@@ -7,10 +7,12 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# Intents setup
+# ==== INTENTS ====
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
+intents.reactions = True        # ✅ Needed for on_reaction_add
+intents.messages = True         # ✅ Needed to detect message objects
 
 bot = commands.Bot(command_prefix="--", intents=intents)
 
@@ -80,16 +82,24 @@ async def on_reaction_add(reaction, user):
     if user.bot:
         return
 
-    if reaction.message.channel.name == "✅ verify" and str(reaction.emoji) == "✅":
+    # Use lower to avoid emoji name mismatch
+    if reaction.message.channel.name.lower() == "✅ verify" and str(reaction.emoji) == "✅":
         guild = reaction.message.guild
+        member = guild.get_member(user.id)
+
         verified = discord.utils.get(guild.roles, name="Verified")
         unverified = discord.utils.get(guild.roles, name="Unverified")
-        member = guild.get_member(user.id)
+
+        if not verified:
+            verified = await guild.create_role(name="Verified")
 
         if unverified in member.roles:
             await member.remove_roles(unverified)
             await member.add_roles(verified)
-            await user.send("✅ You’re now verified! Enjoy the server 💫")
+            try:
+                await user.send("✅ You’re now verified! Enjoy the server 💫")
+            except discord.Forbidden:
+                pass  # can't DM user
 
 # ========== COMMANDS ==========
 @bot.command()
@@ -102,7 +112,6 @@ async def tag(ctx, *, arg):
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def greet(ctx, member: discord.Member = None):
-    """Send a test welcome message manually"""
     member = member or ctx.author
     guild = ctx.guild
 
@@ -118,7 +127,6 @@ async def greet(ctx, member: discord.Member = None):
     )
     embed.set_thumbnail(url=member.avatar.url if member.avatar else guild.icon.url)
     embed.set_footer(text=f"Member #{len(guild.members)} • {guild.name}")
-
     await welcome_channel.send(embed=embed)
     await ctx.send("✅ Test welcome message sent!")
 
