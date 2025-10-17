@@ -7,8 +7,8 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # ------- CONFIG (IDs & role names) -------
-VERIFY_CHANNEL_ID = 1426527917956927510    # channel where users react to verify
-WELCOME_CHANNEL_ID = 1426504228393713735   # channel to send welcome messages
+VERIFY_CHANNEL_ID = 1420815301536251967    # channel where users react to verify
+WELCOME_CHANNEL_ID = 1420554565895454751   # channel to send welcome messages
 UNVERIFIED_ROLE_NAME = "Unverified"
 VERIFIED_ROLE_NAME = "Verified"
 
@@ -205,3 +205,4 @@ async def greet(ctx, member: discord.Member = None):
 
 # ------------------ RUN ------------------
 bot.run(TOKEN)
+
